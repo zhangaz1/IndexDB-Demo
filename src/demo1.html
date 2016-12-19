@@ -14,94 +14,122 @@
 
 			var db;
 			var dbName = 'test1';
-			var version = 2;
+			var version = 1;
 
-			// Promise.resolve()
-			// 	.then(deleteDatabase)
-			// 	.then(createObjectStore)
-			// 	.then(createIndex);
-
-			// deleteDatabase();
-			test();
+			runTest();
 
 			return void(0);
 
+			function runTest() {
+				// Promise.resolve()
+				// 	.then(deleteDatabase)
+				// 	.then(createObjectStore)
+				// 	.then(createIndex);
+
+				Promise.resolve()
+					.then(deleteDatabase)
+					.then(test);
+			}
+
 			function test() {
-				var openRequest = indexedDB.open(dbName, 1);
+				return new Promise(function (resolve, reject) {
+					var openRequest = indexedDB.open(dbName, 3);
 
-				openRequest.onerror = function (e) {
-					console.log("Database error: " + e.target.errorCode);
-				};
+					openRequest.onerror = function (e) {
+						console.log("Database error: " + e.target.errorCode);
+						reject();
+					};
 
-				openRequest.onsuccess = function (event) {
-					db = openRequest.result;
-				};
+					openRequest.onsuccess = function (event) {
+						db = openRequest.result;
+						resolve();
+					};
 
-				openRequest.onupgradeneeded = function (evt) {
-					var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
-						keyPath: "id"
-					});
+					openRequest.onupgradeneeded = function (evt) {
+						var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
+							keyPath: "id"
+						});
 
-					employeeStore.createIndex("stateIndex", "state", {
-						unique: false
-					});
-					employeeStore.createIndex("emailIndex", "email", {
-						unique: true
-					});
-					employeeStore.createIndex("zipCodeIndex", "zip_code", {
-						unique: false
-					})
-				};
+						employeeStore.createIndex("stateIndex", "state", {
+							unique: false
+						});
+						employeeStore.createIndex("emailIndex", "email", {
+							unique: true
+						});
+						employeeStore.createIndex("zipCodeIndex", "zip_code", {
+							unique: false
+						})
+					};
+				});
 			}
 
 			function deleteDatabase() {
-				var deleteDbRequest = indexedDB.deleteDatabase(dbName);
-				deleteDbRequest.onsuccess = function (event) {
-					console.log('database deleted successfully');
-				};
-				deleteDbRequest.onerror = function (e) {
-					console.log("Database error: " + e.target.errorCode);
-				};
+				return new Promise(function (resolve, reject) {
+					var deleteDbRequest = indexedDB.deleteDatabase(dbName);
+
+					deleteDbRequest.onsuccess = function (event) {
+						console.log('database deleted successfully');
+						resolve();
+					};
+
+					deleteDbRequest.onerror = function (e) {
+						console.log("Database error: " + e.target.errorCode);
+						reject();
+					};
+				});
 			}
 
 			function createObjectStore() {
-				var openRequest = indexedDB.open(dbName);
+				return new Promise(function (resolve, reject) {
+					var openRequest = indexedDB.open(dbName, version++);
 
-				openRequest.onerror = function (e) {
-					console.log("Database error: " + e.target.errorCode);
-				};
+					openRequest.onerror = function (e) {
+						console.log("Database error: " + e.target.errorCode);
+						reject();
+					};
 
-				openRequest.onsuccess = function (event) {
-					db = openRequest.result;
-				};
+					openRequest.onsuccess = function (event) {
+						db = openRequest.result;
+						resolve();
+					};
 
-				openRequest.onupgradeneeded = function (evt) {
-					var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
-						keyPath: "id"
-					});
-				};
+					openRequest.onupgradeneeded = function (evt) {
+						var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
+							keyPath: "id"
+						});
+					};
+				});
+
 			}
 
 			function createIndex() {
-				var openRequest = indexedDB.open(dbName, 3);
-				openRequest.onerror = function (e) {
-					console.log("Database error: " + e.target.errorCode);
-				};
-				openRequest.onsuccess = function (event) {
-					db = openRequest.result;
-				};
-				openRequest.onupgradeneeded = function (evt) {
-					var employeeStore = evt.currentTarget.result.objectStore("employees");
-					employeeStore.createIndex("stateIndex", "state", {
-						unique: false
-					});
-					employeeStore.createIndex("emailIndex", "email", {
-						unique: true
-					});
-					employeeStore.createIndex("zipCodeIndex", "zip_code", {
-						unique: false
-					})
-				};
+				return new Promise(function (resolve, reject) {
+					var openRequest = indexedDB.open(dbName, version++);
+
+					openRequest.onerror = function (e) {
+						console.log("Database error: " + e.target.errorCode);
+						reject();
+					};
+
+					openRequest.onsuccess = function (event) {
+						db = openRequest.result;
+						resolve();
+					};
+
+					openRequest.onupgradeneeded = function (evt) {
+						var employeeStore = evt.currentTarget.result.objectStore("employees");
+						employeeStore.createIndex("stateIndex", "state", {
+							unique: false
+						});
+						employeeStore.createIndex("emailIndex", "email", {
+							unique: true
+						});
+						employeeStore.createIndex("zipCodeIndex", "zip_code", {
+							unique: false
+						})
+					};
+
+				});
 			}
 		});
 	</script>
