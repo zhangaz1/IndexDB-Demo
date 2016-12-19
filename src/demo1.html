@@ -32,7 +32,7 @@
 				// 	.then(fetchEmployee);
 
 				open()
-					.then(fetchNewYorkEmployees);
+					.then(fetchEmployeeByZipCode1);
 			}
 
 			function test() {
@@ -332,6 +332,32 @@
 							.objectStore("employees");
 
 						var index = store.index("stateIndex");
+
+						index.openCursor(range).onsuccess = function (evt) {
+							var cursor = evt.target.result;
+							if (cursor) {
+								var employee = cursor.value;
+								var jsonStr = JSON.stringify(employee);
+								result.innerHTML = result.innerHTML + " " + jsonStr;
+								cursor.continue();
+							}
+						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
+			function fetchEmployeeByZipCode1() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db) {
+						var store = db.transaction("employees").objectStore("employees");
+						var index = store.index("zipCodeIndex");
+
+						var range = IDBKeyRange.lowerBound("20500", false);
 
 						index.openCursor(range).onsuccess = function (evt) {
 							var cursor = evt.target.result;
