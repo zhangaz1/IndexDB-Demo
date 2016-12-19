@@ -32,7 +32,7 @@
 				// 	.then(fetchEmployee);
 
 				open()
-					.then(fetchEmployee);
+					.then(fetchEmployeeByEmail);
 			}
 
 			function test() {
@@ -207,6 +207,29 @@
 				}
 			}
 
+			function fetchEmployeeByEmail() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db) {
+						var range = IDBKeyRange.only("jane.doh@somedomain.com");
+
+						var store = db.transaction("employees")
+							.objectStore("employees");
+
+						var index = store.index("emailIndex");
+
+						index.get(range).onsuccess = function (evt) {
+							var employee = evt.target.result;
+							var jsonStr = JSON.stringify(employee);
+							result.innerHTML = jsonStr;
+						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
 
 		});
 	</script>
