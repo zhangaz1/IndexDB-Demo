@@ -10,13 +10,59 @@
 		$(function () {
 			'use strict';
 
+			var localDatabase = window;
+
 			var db;
 			var dbName = 'test1';
 			var version = 2;
 
-			createObjectStore();
+			// Promise.resolve()
+			// 	.then(deleteDatabase)
+			// 	.then(createObjectStore)
+			// 	.then(createIndex);
+
+			// deleteDatabase();
+			test();
 
 			return void(0);
+
+			function test() {
+				var openRequest = indexedDB.open(dbName, 1);
+
+				openRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+
+				openRequest.onsuccess = function (event) {
+					db = openRequest.result;
+				};
+
+				openRequest.onupgradeneeded = function (evt) {
+					var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
+						keyPath: "id"
+					});
+
+					employeeStore.createIndex("stateIndex", "state", {
+						unique: false
+					});
+					employeeStore.createIndex("emailIndex", "email", {
+						unique: true
+					});
+					employeeStore.createIndex("zipCodeIndex", "zip_code", {
+						unique: false
+					})
+				};
+			}
+
+			function deleteDatabase() {
+				var deleteDbRequest = indexedDB.deleteDatabase(dbName);
+				deleteDbRequest.onsuccess = function (event) {
+					console.log('database deleted successfully');
+				};
+				deleteDbRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+			}
 
 			function createObjectStore() {
 				var openRequest = indexedDB.open(dbName);
@@ -33,6 +79,28 @@
 					var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
 						keyPath: "id"
 					});
+				};
+			}
+
+			function createIndex() {
+				var openRequest = indexedDB.open(dbName, 3);
+				openRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+				openRequest.onsuccess = function (event) {
+					db = openRequest.result;
+				};
+				openRequest.onupgradeneeded = function (evt) {
+					var employeeStore = evt.currentTarget.result.objectStore("employees");
+					employeeStore.createIndex("stateIndex", "state", {
+						unique: false
+					});
+					employeeStore.createIndex("emailIndex", "email", {
+						unique: true
+					});
+					employeeStore.createIndex("zipCodeIndex", "zip_code", {
+						unique: false
+					})
 				};
 			}
 		});
