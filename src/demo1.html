@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/less" href="css/main.less" />
+	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
+	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
+	<script type="text/javascript" src="js/indexedDBWrapper.js"></script>
+	<script type="text/javascript">
+		$(function () {
+			'use strict';
+
+			var db;
+			var dbName = 'test1';
+			var version = 2;
+
+			createObjectStore();
+
+			return void(0);
+
+			function createObjectStore() {
+				var openRequest = indexedDB.open(dbName);
+
+				openRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+
+				openRequest.onsuccess = function (event) {
+					db = openRequest.result;
+				};
+
+				openRequest.onupgradeneeded = function (evt) {
+					var employeeStore = evt.currentTarget.result.createObjectStore("employees", {
+						keyPath: "id"
+					});
+				};
+			}
+		});
+	</script>
+</head>
+
+<body>
+	<h1>Use Index DB</h1>
+</body>
+
+</html>
