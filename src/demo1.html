@@ -32,7 +32,7 @@
 				// 	.then(fetchEmployee);
 
 				open()
-					.then(fetchAllEmployees);
+					.then(fetchNewYorkEmployees);
 			}
 
 			function test() {
@@ -306,6 +306,34 @@
 
 						var request = store.openCursor();
 						request.onsuccess = function (evt) {
+							var cursor = evt.target.result;
+							if (cursor) {
+								var employee = cursor.value;
+								var jsonStr = JSON.stringify(employee);
+								result.innerHTML = result.innerHTML + " " + jsonStr;
+								cursor.continue();
+							}
+						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
+			function fetchNewYorkEmployees() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db) {
+						var range = IDBKeyRange.only("DC");
+
+						var store = db.transaction("employees")
+							.objectStore("employees");
+
+						var index = store.index("stateIndex");
+
+						index.openCursor(range).onsuccess = function (evt) {
 							var cursor = evt.target.result;
 							if (cursor) {
 								var employee = cursor.value;
