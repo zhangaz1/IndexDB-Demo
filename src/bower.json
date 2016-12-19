@@ -1,0 +1,27 @@
+{
+  "name": "webDemoTemplate",
+  "homepage": "https://github.com/zhangaz1/webDemoTemplate",
+  "authors": [
+    "zhangaz1 <zhangaz1@hotmail.com>"
+  ],
+  "description": "web demo template",
+  "main": "index.html",
+  "keywords": [
+    "demo",
+    "test",
+    "template"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.1.0",
+    "less": "^2.7.1",
+    "lodash": "^4.13.1"
+  }
+}
