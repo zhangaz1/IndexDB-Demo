@@ -17,6 +17,7 @@
     function createIndexedDBWrapper() {
         return {
             open: open,
+            deleteDatabase: deleteDatabase,
         };
     }
 
@@ -28,7 +29,7 @@
         };
 
         openRequest.onsuccess = function (event) {
-            console.log("Database created");
+            console.debug("Database created");
             db = openRequest.result;
 
             if (cb) {
@@ -37,9 +38,20 @@
         };
 
         openRequest.onupgradeneeded = function (evt) {
-            console.log('UpgradeNeeded', evt);
+            console.debug('UpgradeNeeded', evt);
         };
 
+    }
+
+    function deleteDatabase(dbName) {
+        var deleteDbRequest = origIndexedDB.deleteDatabase(dbName);
+
+        deleteDbRequest.onsuccess = function (event) {
+            console.debug('delete indexedDB', dbName, 'success');
+        };
+        deleteDbRequest.onerror = function (e) {
+            console.error("Database error: " + e);
+        };
     }
 
 })(window);

@@ -10,10 +10,17 @@
 		$(function () {
 			'use strict';
 
+			var dbName = 'test1';
+			var version = 4;
+
 			$('#openDB').click(function () {
-				indexedDBWrapper.open('test1', 4, function (db) {
+				indexedDBWrapper.open(dbName, version, function (db) {
 					console.info('opened db', db);
 				});
+			});
+
+			$('#deleteDB').click(function () {
+				indexedDBWrapper.deleteDatabase(dbName);
 			});
 		});
 	</script>
@@ -23,6 +30,7 @@
 	<h1>Use Index DB</h1>
 	<div>
 		<button id="openDB">openDB</button>
+		<button id="deleteDB">deleteDB</button>
 	</div>
 </body>
 
