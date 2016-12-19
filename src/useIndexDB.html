@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/less" href="css/main.less" />
+	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
+	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
+	<script type="text/javascript" src="js/indexedDBWrapper.js"></script>
+	<script type="text/javascript">
+		$(function () {
+			'use strict';
+
+			$('#openDB').click(function () {
+				indexedDBWrapper.open('test1', 4, function (db) {
+					console.info('opened db', db);
+				});
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<h1>Use Index DB</h1>
+	<div>
+		<button id="openDB">openDB</button>
+	</div>
+</body>
+
+</html>
