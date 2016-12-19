@@ -32,7 +32,7 @@
 				// 	.then(fetchEmployee);
 
 				open()
-					.then(fetchEmployeeByEmail);
+					.then(updateEmployee);
 			}
 
 			function test() {
@@ -225,6 +225,52 @@
 							var jsonStr = JSON.stringify(employee);
 							result.innerHTML = jsonStr;
 						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
+			function updateEmployee() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					var transaction = db.transaction("employees", "readwrite");
+					var store = transaction.objectStore("employees");
+					var jsonStr;
+					var employee;
+
+					if (db) {
+						store.get("E5")
+							.onsuccess = function (event) {
+								employee = event.target.result;
+								// save old value
+								jsonStr = "OLD: " + JSON.stringify(employee);
+								result.innerHTML = jsonStr;
+
+								// update record
+								employee.email = "john.adams@anotherdomain.com";
+								// employee.email += 'x';
+
+								var request = store.put(employee);
+
+								request.onsuccess = function (e) {
+									console.log("Added Employee");
+								};
+
+								request.onerror = function (e) {
+									console.log(e.value);
+								};
+
+
+								// fetch record again
+								store.get("E5").onsuccess = function (event) {
+									employee = event.target.result;
+									jsonStr = "NEW: " + JSON.stringify(employee);
+									result.innerHTML = result.innerHTML + jsonStr;
+								}; // fetch employee again
+							}; // fetch employee first time
 					}
 				} catch (e) {
 					console.log(e);
