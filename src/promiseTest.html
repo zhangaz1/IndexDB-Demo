@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/less" href="css/main.less" />
+    <script type="text/javascript" src="libs/lodash/lodash.js"></script>
+    <script type="text/javascript" src="libs/jquery/jquery.js"></script>
+    <script type="text/javascript" src="libs/less/less.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            open()
+                .then(doSomething)
+                .then(function () {
+                    console.log('success');
+                }, function () {
+                    console.log('failed');
+                });
+
+            function open() {
+                return new Promise(function (resolve, reject) {
+                    setTimeout(function () {
+                        console.log('open success');
+                        resolve(true);
+                    }, 800);
+                });
+            }
+
+            function doSomething(data) {
+                return new Promise(function (resolve, reject) {
+                    if (!data) {
+                        resolve('something success');
+                    } else {
+                        reject('something failed');
+                    }
+                });
+            }
+
+        });
+    </script>
+</head>
+
+<body>
+    <h1>Promise test</h1>
+</body>
+
+</html>
