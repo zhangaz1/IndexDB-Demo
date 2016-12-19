@@ -374,6 +374,32 @@
 				}
 			}
 
+			function fetchEmployeeByZipCode2() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db) {
+						var store = db.transaction("employees").objectStore("employees");
+						var index = store.index("zipCodeIndex");
+
+						var range = IDBKeyRange.upperBound("93000");
+
+						index.openCursor(range).onsuccess = function (evt) {
+							var cursor = evt.target.result;
+							if (cursor) {
+								var employee = cursor.value;
+								var jsonStr = JSON.stringify(employee);
+								result.innerHTML = result.innerHTML + " " + jsonStr;
+								cursor.continue();
+							}
+						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
 		});
 	</script>
 </head>
