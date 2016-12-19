@@ -32,7 +32,7 @@
 				// 	.then(fetchEmployee);
 
 				open()
-					.then(fetchEmployeeByZipCode1);
+					.then(fetchEmployeeByZipCode3);
 			}
 
 			function test() {
@@ -384,6 +384,32 @@
 						var index = store.index("zipCodeIndex");
 
 						var range = IDBKeyRange.upperBound("93000");
+
+						index.openCursor(range).onsuccess = function (evt) {
+							var cursor = evt.target.result;
+							if (cursor) {
+								var employee = cursor.value;
+								var jsonStr = JSON.stringify(employee);
+								result.innerHTML = result.innerHTML + " " + jsonStr;
+								cursor.continue();
+							}
+						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
+			function fetchEmployeeByZipCode3() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db) {
+						var store = db.transaction("employees").objectStore("employees");
+						var index = store.index("zipCodeIndex");
+
+						var range = IDBKeyRange.bound("2000", "92999", true, true);
 
 						index.openCursor(range).onsuccess = function (evt) {
 							var cursor = evt.target.result;
