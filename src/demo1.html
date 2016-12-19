@@ -32,7 +32,7 @@
 				// 	.then(fetchEmployee);
 
 				open()
-					.then(updateEmployee);
+					.then(clearAllEmployees);
 			}
 
 			function test() {
@@ -271,6 +271,24 @@
 									result.innerHTML = result.innerHTML + jsonStr;
 								}; // fetch employee again
 							}; // fetch employee first time
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
+
+			function clearAllEmployees() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db) {
+						var store = db.transaction("employees", "readwrite")
+							.objectStore("employees");
+
+						store.clear().onsuccess = function (event) {
+							result.innerHTML = "'Employees' object store cleared";
+						};
 					}
 				} catch (e) {
 					console.log(e);
