@@ -28,7 +28,8 @@
 
 				Promise.resolve()
 					.then(deleteDatabase)
-					.then(test);
+					.then(test)
+					.then(fetchEmployee);
 			}
 
 			function test() {
@@ -131,12 +132,36 @@
 
 				});
 			}
+
+			function fetchEmployee() {
+				try {
+					var result = document.getElementById("result");
+					result.innerHTML = "";
+
+					if (db != null) {
+						var store = db.transaction("employees").objectStore("employees");
+
+						store.get("E3").onsuccess = function (event) {
+							var employee = event.target.result;
+							if (employee == null) {
+								result.value = "employee not found";
+							} else {
+								var jsonStr = JSON.stringify(employee);
+								result.innerHTML = jsonStr;
+							}
+						};
+					}
+				} catch (e) {
+					console.log(e);
+				}
+			}
 		});
 	</script>
 </head>
 
 <body>
 	<h1>Use Index DB</h1>
+	<div id="result"></div>
 </body>
 
 </html>
