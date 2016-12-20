@@ -13,6 +13,7 @@
 			$('#getAllDbs').click(getAllDbs);
 			$('#getDbSize').click(getDbSize);
 			$('#deleteDb').click(deleteDb);
+			$('#insertEmployee').click(insertEmployee);
 			$('#insert50W').click(insert50W);
 
 
@@ -21,8 +22,52 @@
 
 			return void(0);
 
-			function insert50W() {
+			function insertEmployee() {
+				getDb(function () {
+					doInsertEmployee(createEmployee(0));
+				});
+			}
 
+			function createEmployee(order) {
+				return {
+					"id": "E" + order,
+					"first_name": "Jane",
+					"last_name": "Doh",
+					"email": "jane.doh@somedomain.com_" + order,
+					"street": "123 Pennsylvania Avenue",
+					"city": "Washington D.C.",
+					"state": "DC",
+					"zip_code": "20500",
+				};
+			}
+
+			function doInsertEmployee(employee) {
+				return new Promise(function (resolve, reject) {
+					var transaction = db.transaction("employees", "readwrite");
+					var store = transaction.objectStore("employees");
+
+					var request = store.add(employee);
+
+					request.onsuccess = function (e) {
+						console.log('Employee record was added successfully.');
+						resolve(true);
+					};
+
+					request.onerror = function (e) {
+						console.log('Employee record was not added.');
+						console.error(e);
+						reject();
+					};
+				});
+			}
+
+			function insert50W() {
+				getDb(doInsert50W);
+			}
+
+			function doInsert50W(newDb) {
+				var order = 0;
+				insertEmployee(createEmployee(order++));
 			}
 
 			function getDb(cb) {
@@ -231,6 +276,7 @@
 			<button id="deleteStore">delete store</button>
 		</div>
 		<div>
+			<button id="insertEmployee">insert employee</button>
 			<button id="insert50W">insert 50W</button>
 		</div>
 	</div>
