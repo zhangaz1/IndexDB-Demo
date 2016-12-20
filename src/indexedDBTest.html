@@ -13,14 +13,32 @@
 			$('#getAllDbs').click(getAllDbs);
 			$('#getDbSize').click(getDbSize);
 			$('#deleteDb').click(deleteDb);
+
+			$('#clear').click(clear);
 			$('#insertEmployee').click(insertEmployee);
 			$('#insert50W').click(insert50W);
 
 
+			var dbName = 'test';
 			var db;
 			var storeName = 'employees';
 
 			return void(0);
+
+			function clear() {
+				getDb(function () {
+					var store = getStore();
+					var request = store.clear();
+
+					request.onsuccess = function () {
+						console.log('clear success');
+					}
+
+					request.onerror = function(){
+						console.log('clear failed');
+					}
+				});
+			}
 
 			function insertEmployee() {
 				getDb(function () {
@@ -43,8 +61,7 @@
 
 			function doInsertEmployee(employee) {
 				return new Promise(function (resolve, reject) {
-					var transaction = db.transaction("employees", "readwrite");
-					var store = transaction.objectStore("employees");
+					var store = getStore();
 
 					var request = store.add(employee);
 
@@ -61,9 +78,14 @@
 				});
 			}
 
+			function getStore() {
+				var transaction = db.transaction(storeName, "readwrite");
+				var store = transaction.objectStore(storeName);
+				return store;
+			}
+
 			function insert50W() {
 				getDb(function () {
-					
 					doInsert50W(0);
 				});
 			}
@@ -79,7 +101,7 @@
 
 			function getDb(cb) {
 				if (!db) {
-					openDatabase()
+					openDatabase(dbName)
 						.then(cb);
 				} else {
 					cb(db);
@@ -130,7 +152,7 @@
 							return;
 						}
 
-						var employeeStore = dbNew.createObjectStore("employees", {
+						var employeeStore = dbNew.createObjectStore(storeName, {
 							keyPath: "id"
 						});
 
@@ -283,6 +305,7 @@
 			<button id="deleteStore">delete store</button>
 		</div>
 		<div>
+			<button id="clear">clear</button>
 			<button id="insertEmployee">insert employee</button>
 			<button id="insert50W">insert 50W</button>
 		</div>
