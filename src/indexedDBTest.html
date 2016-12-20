@@ -8,6 +8,7 @@
 	<script>
 		$(function () {
 			$('#createDb').click(createDb);
+			$('#initStore').click(initStore);
 			$('#getAllDbs').click(getAllDbs);
 			$('#getDbSize').click(getDbSize);
 			$('#deleteDb').click(deleteDb);
@@ -15,6 +16,55 @@
 			var db;
 
 			return void(0);
+
+			function initStore() {
+				if (!db) {
+					openDatabase()
+						.then(doInitStore);
+				} else {
+					doInitStore(db);
+				}
+			}
+
+			function doInitStore(dbOld) {
+				dbOld.close();
+				var openRequest = indexedDB.open(dbOld.name, dbOld.version + 1);
+
+				openRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+
+				openRequest.onsuccess = function () {
+					db = openRequest.result;
+				};
+
+				openRequest.onupgradeneeded = function (e) {
+					var storeName = 'employees';
+
+					var db = e.currentTarget.result;
+
+					if (db.objectStoreNames.contains(storeName)) {
+						console.log('object store', storeName, 'existed');
+						return;
+					}
+
+					var employeeStore = db.createObjectStore("employees", {
+						keyPath: "id"
+					});
+
+					employeeStore.createIndex("stateIndex", "state", {
+						unique: false
+					});
+					employeeStore.createIndex("emailIndex", "email", {
+						unique: true
+					});
+					employeeStore.createIndex("zipCodeIndex", "zip_code", {
+						unique: false
+					})
+
+					console.log('init store success');
+				};
+			}
 
 			function deleteDb() {
 				var dbName = getDbName();
@@ -138,6 +188,7 @@
 	<h1>Test Indexed DB</h1>
 	<div>
 		<button id="createDb">create db</button>
+		<button id="initStore">init store</button>
 		<button id="getAllDbs">get all dbs</button>
 		<button id="getDbSize">get db size</button>
 		<button id="deleteDb">delete db</button>
