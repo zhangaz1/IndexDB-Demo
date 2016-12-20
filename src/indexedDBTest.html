@@ -2,13 +2,14 @@
 <html>
 
 <head>
+	<script type="text/javascript" src="libs/babel-polyfill/polyfill.js"></script>
 	<link rel="stylesheet" type="text/less" href="css/main.less" />
 	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
 	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
 	<script>
 		$(function () {
 
-			var data =new Array(1024 * 1024).join('x');
+			var data;
 
 			$('#createDb').click(createDb);
 			$('#initStore').click(initStore);
@@ -22,6 +23,7 @@
 			$('#insertEmployee').click(insertEmployee);
 			$('#insert50W').click(insert50W);
 			$('#insert50W2').click(insert50W2);
+			$('#insert50W3').click(insert50W3);
 
 
 			var dbName = 'test';
@@ -33,7 +35,7 @@
 
 			function count() {
 				getDb(function () {
-					var store = getStore();
+					var store = getStoreReadOnly();
 					var request = store.count();
 					logRequestResult(request, 'Count')
 						.then(function (count) {
@@ -44,7 +46,7 @@
 
 			function clear() {
 				getDb(function () {
-					var store = getStore();
+					var store = getStoreReadWrite();
 					var request = store.clear();
 					logRequestResult(request, 'Clear');
 				});
@@ -75,21 +77,21 @@
 					"first_name": "Jane",
 					"last_name": "Doh",
 					"email": "jane.doh@somedomain.com_" + order,
-					"street": data,
+					"street": getData(),
 					"city": "Washington D.C.",
 					"state": "DC",
 					"zip_code": "20500",
 				};
 			}
 
-			async function doInsertEmployee(employee) {
+			function doInsertEmployee(employee) {
 				return new Promise(function (resolve, reject) {
-					var store = getStore();
+					var store = getStoreReadWrite();
 
 					var request = store.add(employee);
 
 					request.onsuccess = function (e) {
-						console.log('Employee record was added successfully.');
+						console.log('Employee record was added successfully.', employee.id);
 						resolve(true);
 					};
 
@@ -101,8 +103,14 @@
 				});
 			}
 
-			function getStore() {
-				var transaction = db.transaction(storeName, "readwrite");
+			function getStoreReadWrite() {
+				var transaction = db.transaction(storeName, 'readwrite');
+				var store = transaction.objectStore(storeName);
+				return store;
+			}
+
+			function getStoreReadOnly() {
+				var transaction = db.transaction(storeName, 'readonly');
 				var store = transaction.objectStore(storeName);
 				return store;
 			}
@@ -116,7 +124,7 @@
 			// 			employees.push(createEmployee(i));
 			// 		}
 
-			// 		var store = getStore();
+			// 		var store = getStoreReadWrite();
 			// 		console.time('insert 50w 2');
 			// 		for (i = w50; i > 0; i--) {
 			// 			await doInsertEmployee(employees[i]);
@@ -127,7 +135,7 @@
 
 			function insert50W() {
 				getDb(function () {
-					console.time('insert 50w');					
+					console.time('insert 50w');
 					doInsert50W(0);
 				});
 			}
@@ -137,11 +145,11 @@
 					doInsertEmployee(createEmployee(order))
 						.then(function () {
 							doInsert50W(order + 1);
-						},function(){
-							console.timeEnd('insert 50w');																	
+						}, function () {
+							console.timeEnd('insert 50w');
 						});
 				} else {
-					console.timeEnd('insert 50w');										
+					console.timeEnd('insert 50w');
 				}
 			}
 
@@ -333,7 +341,19 @@
 				}
 			}
 
-			
+			function getData() {
+				return data ||
+					(data = createData());
+			}
+
+			function createData() {
+				var n = 1024 * 1024 / 2;
+				var data = new Array(n);
+				for (i = 0; i < n; i++) {
+					data[i] = i;
+				}
+				return data.join('x').substring(0, n);
+			}
 
 		});
 	</script>
@@ -358,6 +378,7 @@
 			<button id="insertEmployee">insert employee</button>
 			<button id="insert50W">insert 50W</button>
 			<button id="insert50W2">insert 50W 2</button>
+			<button id="insert50W3">insert 50W 3</button>
 		</div>
 	</div>
 </body>
