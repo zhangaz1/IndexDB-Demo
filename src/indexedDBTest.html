@@ -7,7 +7,7 @@
 	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
 	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
 	<script>
-		$(function () {
+		$(function() {
 
 			var data;
 
@@ -34,18 +34,18 @@
 			return void(0);
 
 			function count() {
-				getDb(function () {
+				getDb(function() {
 					var store = getStoreReadOnly();
 					var request = store.count();
 					logRequestResult(request, 'Count')
-						.then(function (count) {
+						.then(function(count) {
 							console.log(count, 'employees');
 						});
 				});
 			}
 
 			function clear() {
-				getDb(function () {
+				getDb(function() {
 					var store = getStoreReadWrite();
 					var request = store.clear();
 					logRequestResult(request, 'Clear');
@@ -53,20 +53,20 @@
 			}
 
 			function logRequestResult(request, description) {
-				return new Promise(function (resolve, reject) {
-					request.onsuccess = function (e) {
+				return new Promise(function(resolve, reject) {
+					request.onsuccess = function(e) {
 						console.log(description, 'success');
 						resolve(e.currentTarget.result);
 					}
 
-					request.onerror = function (e) {
+					request.onerror = function(e) {
 						console.log(description, 'failed', e);
 					}
 				});
 			}
 
 			function insertEmployee() {
-				getDb(function () {
+				getDb(function() {
 					doInsertEmployee(createEmployee(0));
 				});
 			}
@@ -85,17 +85,17 @@
 			}
 
 			function doInsertEmployee(employee) {
-				return new Promise(function (resolve, reject) {
+				return new Promise(function(resolve, reject) {
 					var store = getStoreReadWrite();
 
 					var request = store.add(employee);
 
-					request.onsuccess = function (e) {
+					request.onsuccess = function(e) {
 						console.log('Employee record was added successfully.', employee.id);
 						resolve(true);
 					};
 
-					request.onerror = function (e) {
+					request.onerror = function(e) {
 						console.log('Employee record was not added.');
 						console.error(e);
 						reject();
@@ -134,7 +134,7 @@
 			// }
 
 			function insert50W() {
-				getDb(function () {
+				getDb(function() {
 					console.time('insert 50w');
 					doInsert50W(0);
 				});
@@ -143,9 +143,33 @@
 			function doInsert50W(order) {
 				if (order < w50) {
 					doInsertEmployee(createEmployee(order))
-						.then(function () {
+						.then(function() {
 							doInsert50W(order + 1);
-						}, function () {
+						}, function() {
+							console.timeEnd('insert 50w');
+						});
+				} else {
+					console.timeEnd('insert 50w');
+				}
+			}
+
+
+			function insert50W3() {
+				getDb(function() {
+					console.time('insert 50w');
+					var data = {
+						data: getData(),
+					};
+					doInsert50W3(0, data);
+				});
+			}
+
+			function doInsert50W3(order, data) {
+				if (order < w50) {
+					doInsertEmployee(data)
+						.then(function() {
+							doInsert50W3(order + 1, data);
+						}, function() {
 							console.timeEnd('insert 50w');
 						});
 				} else {
@@ -167,7 +191,7 @@
 			}
 
 			function doDeleteStore(dbOld) {
-				upgradeVersion(dbOld, function (dbNew) {
+				upgradeVersion(dbOld, function(dbNew) {
 					try {
 						dbNew.deleteObjectStore(storeName);
 						console.log('delete store success');
@@ -185,21 +209,21 @@
 				dbOld.close();
 				var openRequest = indexedDB.open(dbOld.name, dbOld.version + 1);
 
-				openRequest.onerror = function (e) {
+				openRequest.onerror = function(e) {
 					console.log("Database error: " + e.target.errorCode);
 				};
 
-				openRequest.onsuccess = function (e) {
+				openRequest.onsuccess = function(e) {
 					db = e.currentTarget.result;
 				};
 
-				openRequest.onupgradeneeded = function (e) {
+				openRequest.onupgradeneeded = function(e) {
 					upgrade(e.currentTarget.result);
 				}
 			}
 
 			function doInitStore(dbOld) {
-				upgradeVersion(dbOld, function (dbNew) {
+				upgradeVersion(dbOld, function(dbNew) {
 					try {
 						if (dbNew.objectStoreNames.contains(storeName)) {
 							console.log('object store', storeName, 'existed');
@@ -207,18 +231,23 @@
 						}
 
 						var employeeStore = dbNew.createObjectStore(storeName, {
-							keyPath: "id"
+							keyPath: "id",
+							autoIncrement: true
 						});
 
-						employeeStore.createIndex("stateIndex", "state", {
-							unique: false
-						});
-						employeeStore.createIndex("emailIndex", "email", {
-							unique: true
-						});
-						employeeStore.createIndex("zipCodeIndex", "zip_code", {
-							unique: false
-						})
+						// var employeeStore = dbNew.createObjectStore(storeName, {
+						// 	keyPath: "id"
+						// });
+
+						// employeeStore.createIndex("stateIndex", "state", {
+						// 	unique: false
+						// });
+						// employeeStore.createIndex("emailIndex", "email", {
+						// 	unique: true
+						// });
+						// employeeStore.createIndex("zipCodeIndex", "zip_code", {
+						// 	unique: false
+						// })
 
 						console.log('init store success');
 					} catch (e) {
@@ -235,20 +264,20 @@
 
 				var deleteDbRequest = indexedDB.deleteDatabase(dbName);
 
-				deleteDbRequest.onsuccess = function (event) {
+				deleteDbRequest.onsuccess = function(event) {
 					console.log('database deleted successfully');
 				};
 
-				deleteDbRequest.onerror = function (e) {
+				deleteDbRequest.onerror = function(e) {
 					console.log("Database error: " + e.target.errorCode);
 				};
 			}
 
 			function createDb() {
 				openDatabase()
-					.then(function () {
+					.then(function() {
 						console.log('create db success');
-					}, function () {
+					}, function() {
 						consol.elog('create db failed')
 					});
 			}
@@ -257,13 +286,13 @@
 				var storesizes = new Array();
 
 				openDatabase()
-					.then(function () {
+					.then(function() {
 						var stores = db.objectStoreNames;
 						var PromiseArray = [];
 						for (var i = 0; i < stores.length; i++) {
 							PromiseArray.push(getObjectStoreData(stores[i]));
 						}
-						Promise.all(PromiseArray).then(function () {
+						Promise.all(PromiseArray).then(function() {
 							console.table(storesizes);
 						});
 					});
@@ -271,11 +300,11 @@
 				return void(0);
 
 				function getObjectStoreData(storename) {
-					return new Promise(function (resolve, reject) {
+					return new Promise(function(resolve, reject) {
 						var trans = db.transaction(storename, IDBTransaction.READ_ONLY);
 						var store = trans.objectStore(storename);
 						var items = [];
-						trans.oncomplete = function (evt) {
+						trans.oncomplete = function(evt) {
 							var szBytes = toSize(items);
 							var szMBytes = (szBytes / 1024 / 1024).toFixed(2);
 							storesizes.push({
@@ -286,10 +315,10 @@
 							resolve();
 						};
 						var cursorRequest = store.openCursor();
-						cursorRequest.onerror = function (error) {
+						cursorRequest.onerror = function(error) {
 							reject(error);
 						};
-						cursorRequest.onsuccess = function (evt) {
+						cursorRequest.onsuccess = function(evt) {
 							var cursor = evt.target.result;
 							if (cursor) {
 								items.push(cursor.value);
@@ -311,13 +340,13 @@
 			}
 
 			function openDatabase(dbName) {
-				return new Promise(function (resolve, reject) {
+				return new Promise(function(resolve, reject) {
 					//prompt for DB name
 					var dbname = dbName || getDbName();
 
 					if (dbname !== null) {
 						var request = window.indexedDB.open(dbname);
-						request.onsuccess = function (event) {
+						request.onsuccess = function(event) {
 							db = event.target.result;
 							resolve(db);
 						};
@@ -332,11 +361,11 @@
 
 			function getAllDbs() {
 				var request = indexedDB.webkitGetDatabaseNames();
-				request.onsuccess = function (e) {
+				request.onsuccess = function(e) {
 					console.log('dbs');
 					console.table(e.target);
 				};
-				request.onerror = function (e) {
+				request.onerror = function(e) {
 					console.log('get dbs failed', e);
 				}
 			}
