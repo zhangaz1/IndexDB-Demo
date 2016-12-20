@@ -11,10 +11,17 @@
 
 			return void(0);
 
-			function getAllDbs(){
-				console.log('todo get all dbs');
+			function getAllDbs() {
+				var request = indexedDB.webkitGetDatabaseNames();
+				request.onsuccess = function (e) {
+					console.log('dbs');
+					console.table(e.target);
+				};
+				request.onerror = function (e) {
+					console.log('get dbs failed', e);
+				}
 			}
-			
+
 		});
 	</script>
 </head>
