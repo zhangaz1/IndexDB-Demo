@@ -9,13 +9,35 @@
 		$(function () {
 			$('#createDb').click(createDb);
 			$('#initStore').click(initStore);
+			$('#deleteStore').click(deleteStore);
 			$('#getAllDbs').click(getAllDbs);
 			$('#getDbSize').click(getDbSize);
 			$('#deleteDb').click(deleteDb);
 
 			var db;
+			var storeName = 'employees';
 
 			return void(0);
+
+			function deleteStore() {
+				if (!db) {
+					openDatabase()
+						.then(doDeleteStore);
+				} else {
+					doDeleteStore(db);
+				}
+			}
+
+			function doDeleteStore(dbOld) {
+				upgradeVersion(dbOld, function (dbNew) {
+					try {
+						dbNew.deleteObjectStore(storeName);
+						console.log('delete store success');
+					} catch (e) {
+						console.error(e);
+					}
+				});
+			}
 
 			function initStore() {
 				if (!db) {
@@ -23,6 +45,23 @@
 						.then(doInitStore);
 				} else {
 					doInitStore(db);
+				}
+			}
+
+			function upgradeVersion(dbOld, upgrade) {
+				dbOld.close();
+				var openRequest = indexedDB.open(dbOld.name, dbOld.version + 1);
+
+				openRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+
+				openRequest.onsuccess = function (e) {
+					db = e.currentTarget.result;
+				};
+
+				openRequest.onupgradeneeded = function (e) {
+					upgrade(e.currentTarget.result);
 				}
 			}
 
@@ -39,8 +78,6 @@
 				};
 
 				openRequest.onupgradeneeded = function (e) {
-					var storeName = 'employees';
-
 					var db = e.currentTarget.result;
 
 					if (db.objectStoreNames.contains(storeName)) {
@@ -189,6 +226,7 @@
 	<div>
 		<button id="createDb">create db</button>
 		<button id="initStore">init store</button>
+		<button id="deleteStore">delete store</button>
 		<button id="getAllDbs">get all dbs</button>
 		<button id="getDbSize">get db size</button>
 		<button id="deleteDb">delete db</button>
