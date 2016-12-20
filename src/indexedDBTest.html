@@ -9,8 +9,6 @@
 	<script>
 		$(function() {
 
-			var data;
-
 			$('#createDb').click(createDb);
 			$('#initStore').click(initStore);
 			$('#deleteStore').click(deleteStore);
@@ -25,7 +23,11 @@
 			$('#insert50W2').click(insert50W2);
 			$('#insert50W3').click(insert50W3);
 
+			$('#get').click(getById);
 
+			var row = 0;
+			var data;
+			var size = 4 / (1024 * 1024); //1; // M
 			var dbName = 'test';
 			var db;
 			var storeName = 'employees';
@@ -33,11 +35,28 @@
 
 			return void(0);
 
-			function count() {
+			function getById() {
 				getDb(function() {
 					var store = getStoreReadOnly();
+
+					var key = 'GetById';
+					console.time(key);
+
+					var request = store.get(100);
+					logRequestResult(request, key);
+				});
+			}
+
+			function count() {
+				getDb(function() {
+					var key = 'Count';
+
+					var store = getStoreReadOnly();
 					var request = store.count();
-					logRequestResult(request, 'Count')
+
+					console.time(key);
+
+					logRequestResult(request, key)
 						.then(function(count) {
 							console.log(count, 'employees');
 						});
@@ -47,20 +66,27 @@
 			function clear() {
 				getDb(function() {
 					var store = getStoreReadWrite();
+
+					var key = 'Clear';
+					console.time(key);
+
 					var request = store.clear();
-					logRequestResult(request, 'Clear');
+					logRequestResult(request, key);
 				});
 			}
 
 			function logRequestResult(request, description) {
 				return new Promise(function(resolve, reject) {
 					request.onsuccess = function(e) {
+						console.timeEnd(description);
+
 						console.log(description, 'success');
 						resolve(e.currentTarget.result);
 					}
 
 					request.onerror = function(e) {
 						console.log(description, 'failed', e);
+						reject();
 					}
 				});
 			}
@@ -88,18 +114,13 @@
 				return new Promise(function(resolve, reject) {
 					var store = getStoreReadWrite();
 
+					var key = 'Add';
+					console.time(key);
+
 					var request = store.add(employee);
 
-					request.onsuccess = function(e) {
-						console.log('Employee record was added successfully.', employee.id);
-						resolve(true);
-					};
-
-					request.onerror = function(e) {
-						console.log('Employee record was not added.');
-						console.error(e);
-						reject();
-					};
+					logRequestResult(request, key)
+						.then(resolve, reject);
 				});
 			}
 
@@ -166,6 +187,7 @@
 
 			function doInsert50W3(order, data) {
 				if (order < w50) {
+					data.data = order;
 					doInsertEmployee(data)
 						.then(function() {
 							doInsert50W3(order + 1, data);
@@ -235,9 +257,9 @@
 							autoIncrement: true
 						});
 
-						// var employeeStore = dbNew.createObjectStore(storeName, {
-						// 	keyPath: "id"
-						// });
+						var employeeStore = dbNew.createObjectStore(storeName, {
+							keyPath: "id"
+						});
 
 						// employeeStore.createIndex("stateIndex", "state", {
 						// 	unique: false
@@ -376,7 +398,7 @@
 			}
 
 			function createData() {
-				var n = 1024 * 1024 / 2;
+				var n = 1024 * 1024 / 2 * size;
 				var data = new Array(n);
 				for (i = 0; i < n; i++) {
 					data[i] = i;
@@ -408,6 +430,12 @@
 			<button id="insert50W">insert 50W</button>
 			<button id="insert50W2">insert 50W 2</button>
 			<button id="insert50W3">insert 50W 3</button>
+		</div>
+		<div>
+			<button id="get">get</button>
+			<button id="search">search</button>
+			<button id="delete">delete</button>
+
 		</div>
 	</div>
 </body>
