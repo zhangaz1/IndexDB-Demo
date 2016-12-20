@@ -66,41 +66,32 @@
 			}
 
 			function doInitStore(dbOld) {
-				dbOld.close();
-				var openRequest = indexedDB.open(dbOld.name, dbOld.version + 1);
+				upgradeVersion(dbOld, function (dbNew) {
+					try {
+						if (dbNew.objectStoreNames.contains(storeName)) {
+							console.log('object store', storeName, 'existed');
+							return;
+						}
 
-				openRequest.onerror = function (e) {
-					console.log("Database error: " + e.target.errorCode);
-				};
+						var employeeStore = dbNew.createObjectStore("employees", {
+							keyPath: "id"
+						});
 
-				openRequest.onsuccess = function () {
-					db = openRequest.result;
-				};
+						employeeStore.createIndex("stateIndex", "state", {
+							unique: false
+						});
+						employeeStore.createIndex("emailIndex", "email", {
+							unique: true
+						});
+						employeeStore.createIndex("zipCodeIndex", "zip_code", {
+							unique: false
+						})
 
-				openRequest.onupgradeneeded = function (e) {
-					var db = e.currentTarget.result;
-
-					if (db.objectStoreNames.contains(storeName)) {
-						console.log('object store', storeName, 'existed');
-						return;
+						console.log('init store success');
+					} catch (e) {
+						console.error(e);
 					}
-
-					var employeeStore = db.createObjectStore("employees", {
-						keyPath: "id"
-					});
-
-					employeeStore.createIndex("stateIndex", "state", {
-						unique: false
-					});
-					employeeStore.createIndex("emailIndex", "email", {
-						unique: true
-					});
-					employeeStore.createIndex("zipCodeIndex", "zip_code", {
-						unique: false
-					})
-
-					console.log('init store success');
-				};
+				});
 			}
 
 			function deleteDb() {
