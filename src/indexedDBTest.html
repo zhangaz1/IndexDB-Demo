@@ -62,12 +62,19 @@
 			}
 
 			function insert50W() {
-				getDb(doInsert50W);
+				getDb(function () {
+					
+					doInsert50W(0);
+				});
 			}
 
-			function doInsert50W(newDb) {
-				var order = 0;
-				insertEmployee(createEmployee(order++));
+			function doInsert50W(order) {
+				if (order < 50) {
+					doInsertEmployee(createEmployee(order))
+						.then(function () {
+							doInsert50W(order + 1);
+						});
+				}
 			}
 
 			function getDb(cb) {
