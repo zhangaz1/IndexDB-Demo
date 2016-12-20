@@ -29,15 +29,18 @@
 				getDb(function () {
 					var store = getStore();
 					var request = store.clear();
-
-					request.onsuccess = function () {
-						console.log('clear success');
-					}
-
-					request.onerror = function(){
-						console.log('clear failed');
-					}
+					logRequestResult(request, 'Clear');
 				});
+			}
+
+			function logRequestResult(request, description) {
+				request.onsuccess = function () {
+					console.log(description, 'success');
+				}
+
+				request.onerror = function () {
+					console.log(description, 'failed');
+				}
 			}
 
 			function insertEmployee() {
