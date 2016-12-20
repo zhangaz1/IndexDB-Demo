@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/less" href="css/main.less" />
+	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
+	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
+	<script>
+		$(function () {
+			$('#getAllDbs').click(getAllDbs);
+
+			return void(0);
+
+			function getAllDbs(){
+				console.log('todo get all dbs');
+			}
+			
+		});
+	</script>
+</head>
+
+<body>
+	<h1>Test Indexed DB</h1>
+	<div>
+		<button id="getAllDbs">get all dbs</button>
+	</div>
+</body>
+
+</html>
