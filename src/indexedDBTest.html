@@ -10,10 +10,28 @@
 			$('#createDb').click(createDb);
 			$('#getAllDbs').click(getAllDbs);
 			$('#getDbSize').click(getDbSize);
+			$('#deleteDb').click(deleteDb);
 
 			var db;
 
 			return void(0);
+
+			function deleteDb() {
+				var dbName = getDbName();
+				if (!dbName) {
+					return;
+				}
+
+				var deleteDbRequest = indexedDB.deleteDatabase(dbName);
+
+				deleteDbRequest.onsuccess = function (event) {
+					console.log('database deleted successfully');
+				};
+
+				deleteDbRequest.onerror = function (e) {
+					console.log("Database error: " + e.target.errorCode);
+				};
+			}
 
 			function createDb() {
 				openDatabase()
@@ -84,7 +102,7 @@
 			function openDatabase(dbName) {
 				return new Promise(function (resolve, reject) {
 					//prompt for DB name
-					var dbname = dbName || prompt('Please enter your Database Name', '');
+					var dbname = dbName || getDbName();
 
 					if (dbname !== null) {
 						var request = window.indexedDB.open(dbname);
@@ -95,6 +113,10 @@
 					}
 
 				});
+			}
+
+			function getDbName() {
+				return prompt('Please enter your Database Name', '');
 			}
 
 			function getAllDbs() {
@@ -118,6 +140,7 @@
 		<button id="createDb">create db</button>
 		<button id="getAllDbs">get all dbs</button>
 		<button id="getDbSize">get db size</button>
+		<button id="deleteDb">delete db</button>
 	</div>
 </body>
 
