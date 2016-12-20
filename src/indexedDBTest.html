@@ -14,6 +14,7 @@
 			$('#getDbSize').click(getDbSize);
 			$('#deleteDb').click(deleteDb);
 
+			$('#count').click(count);
 			$('#clear').click(clear);
 			$('#insertEmployee').click(insertEmployee);
 			$('#insert50W').click(insert50W);
@@ -25,6 +26,17 @@
 
 			return void(0);
 
+			function count() {
+				getDb(function () {
+					var store = getStore();
+					var request = store.count();
+					logRequestResult(request, 'Count')
+						.then(function (count) {
+							console.log(count, 'employees');
+						});
+				});
+			}
+
 			function clear() {
 				getDb(function () {
 					var store = getStore();
@@ -34,13 +46,16 @@
 			}
 
 			function logRequestResult(request, description) {
-				request.onsuccess = function () {
-					console.log(description, 'success');
-				}
+				return new Promise(function (resolve, reject) {
+					request.onsuccess = function (e) {
+						console.log(description, 'success');
+						resolve(e.currentTarget.result);
+					}
 
-				request.onerror = function () {
-					console.log(description, 'failed');
-				}
+					request.onerror = function (e) {
+						console.log(description, 'failed', e);
+					}
+				});
 			}
 
 			function insertEmployee() {
@@ -308,6 +323,7 @@
 			<button id="deleteStore">delete store</button>
 		</div>
 		<div>
+			<button id="count">count</button>
 			<button id="clear">clear</button>
 			<button id="insertEmployee">insert employee</button>
 			<button id="insert50W">insert 50W</button>
