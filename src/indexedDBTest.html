@@ -6,6 +6,8 @@
 	<link rel="stylesheet" type="text/less" href="css/main.less" />
 	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
 	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
+	<script type="text/javascript" src="libs/less/less.js"></script>
+
 	<script>
 		$(function() {
 
@@ -24,10 +26,11 @@
 			$('#insert50W3').click(insert50W3);
 
 			$('#get').click(getById);
+			$('#delete').click(deleteById);
 
 			var row = 0;
 			var data;
-			var size = 4 / (1024 * 1024); //1; // M
+			var size = 32 / (1024); //1; // M
 			var dbName = 'test';
 			var db;
 			var storeName = 'employees';
@@ -35,15 +38,42 @@
 
 			return void(0);
 
+			function deleteById() {
+				getDb(function() {
+					var store = getStoreReadWrite();
+
+					var key = 'DeleteById';
+					console.time(key);
+
+					var id = randomId();
+
+					var request = store.delete(id);
+					logRequestResult(request, key)
+						.then(function(data) {
+							console.log(data);
+							doGetById(id);
+						});
+				});
+			}
+
 			function getById() {
+				doGetById();
+			}
+
+			function doGetById(id) {
 				getDb(function() {
 					var store = getStoreReadOnly();
 
 					var key = 'GetById';
 					console.time(key);
 
-					var request = store.get(100);
-					logRequestResult(request, key);
+					id = id || randomId();
+
+					var request = store.get(id);
+					logRequestResult(request, key)
+						.then(function(data) {
+							console.log(id, data);
+						});
 				});
 			}
 
@@ -187,7 +217,8 @@
 
 			function doInsert50W3(order, data) {
 				if (order < w50) {
-					data.data = order;
+					// data.data = order;
+					data.id = order;
 					doInsertEmployee(data)
 						.then(function() {
 							doInsert50W3(order + 1, data);
@@ -406,6 +437,10 @@
 				return data.join('x').substring(0, n);
 			}
 
+			function randomId() {
+				return Math.floor(Math.random() * 100000);
+			}
+
 		});
 	</script>
 </head>
@@ -413,17 +448,17 @@
 <body>
 	<h1>Test Indexed DB</h1>
 	<div>
-		<div>
+		<div class="panel">
 			<button id="getAllDbs">get all dbs</button>
 			<button id="createDb">create db</button>
 			<button id="getDbSize">get db size</button>
 			<button id="deleteDb">delete db</button>
 		</div>
-		<div>
+		<div class="panel">
 			<button id="initStore">init store</button>
 			<button id="deleteStore">delete store</button>
 		</div>
-		<div>
+		<div class="panel">
 			<button id="count">count</button>
 			<button id="clear">clear</button>
 			<button id="insertEmployee">insert employee</button>
@@ -431,13 +466,33 @@
 			<button id="insert50W2">insert 50W 2</button>
 			<button id="insert50W3">insert 50W 3</button>
 		</div>
-		<div>
+		<div class="panel">
 			<button id="get">get</button>
 			<button id="search">search</button>
 			<button id="delete">delete</button>
+		</div>
 
+		<div class="panel form">
+			<div class="row">
+				<label for="store">store:</label><input type="text" id="store" value="test5">
+			</div>
+			<div class="row">
+				<label for="size">recordSize(kb):</label><input type="text" id="size" value="1">
+			</div>
+			<div class="row">
+				<label>job:</label>
+				<input type="radio" radiogroup="job" name="job" value="reader" id="reader" checked="checked"><label for="job">reader</label>
+				<input type="radio" radiogroup="job" name="job" value="writer" id="writer"><label for="writer">writer</label>
+			</div>
+			<div class="row">
+				<button id="start">start</button>
+			</div>
 		</div>
 	</div>
 </body>
+
+</html>
+
+</html>
 
 </html>
