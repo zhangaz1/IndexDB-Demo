@@ -21,6 +21,12 @@
 				summary(key, time);
 			}
 
+			console.result = function(message) {
+				$('<p></p>')
+					.text(message)
+					.appendTo(result);
+			}
+
 			$('#createDb').click(createDb);
 			$('#initStore').click(initStore);
 			$('#deleteStore').click(deleteStore);
@@ -201,7 +207,7 @@
 						success++ :
 						failed++;
 
-						console.log(success, failed, success / (success + failed) * 100 + '%');
+						console.result([success, failed, (success / (success + failed) * 100).toFixed(2) + '%']);
 					});
 			}
 
