@@ -28,6 +28,8 @@
 			$('#get').click(getById);
 			$('#delete').click(deleteById);
 
+			$('#start').click(start);
+
 			var row = 0;
 			var data;
 			var db;
@@ -52,12 +54,16 @@
 			}).val(dbName);
 
 			$('input[name="job"]').change(function() {
-				job = $('input[name="job"][checked]').val();
-			})
+				job = $('input[name="job"]:checked').val();
+			});
 
 			$('input[name="job"][value=reader]').attr('checked', true);
 
 			return void(0);
+
+			function start() {
+
+			}
 
 			function deleteById() {
 				getDb(function() {
