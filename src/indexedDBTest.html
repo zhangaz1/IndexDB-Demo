@@ -30,11 +30,32 @@
 
 			var row = 0;
 			var data;
-			var size = 32 / (1024); //1; // M
-			var dbName = 'test';
 			var db;
 			var storeName = 'employees';
 			var w50 = 5000000;
+
+			var jobs = {
+				reader: 'reader',
+				writer: 'writer',
+			};
+
+			var size = 1; //1; // M
+			var dbName = 'test';
+			var job = jobs.reader;
+
+			$('#size').change(function() {
+				size = $(this).val();
+			}).val(size);
+
+			$('#db').change(function() {
+				dbName = $(this).val();
+			}).val(dbName);
+
+			$('input[name="job"]').change(function() {
+				job = $('input[name="job"][checked]').val();
+			})
+
+			$('input[name="job"][value=reader]').attr('checked', true);
 
 			return void(0);
 
@@ -429,7 +450,7 @@
 			}
 
 			function createData() {
-				var n = 1024 * 1024 / 2 * size;
+				var n = 1024 * size;
 				var data = new Array(n);
 				for (i = 0; i < n; i++) {
 					data[i] = i;
@@ -474,14 +495,14 @@
 
 		<div class="panel form">
 			<div class="row">
-				<label for="store">store:</label><input type="text" id="store" value="test5">
+				<label for="db">db:</label><input type="text" id="db">
 			</div>
 			<div class="row">
-				<label for="size">recordSize(kb):</label><input type="text" id="size" value="1">
+				<label for="size">recordSize(kb):</label><input type="text" id="size">
 			</div>
 			<div class="row">
 				<label>job:</label>
-				<input type="radio" radiogroup="job" name="job" value="reader" id="reader" checked="checked"><label for="job">reader</label>
+				<input type="radio" radiogroup="job" name="job" value="reader" id="reader"><label for="job">reader</label>
 				<input type="radio" radiogroup="job" name="job" value="writer" id="writer"><label for="writer">writer</label>
 			</div>
 			<div class="row">
