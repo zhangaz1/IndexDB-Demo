@@ -37,6 +37,9 @@
 			var storeName = 'employees';
 			var w50 = 5000000;
 
+			var success = 0;
+			var failed = 0;
+
 			var jobs = {
 				reader: 'reader',
 				writer: 'writer',
@@ -93,24 +96,26 @@
 			}
 
 			function read() {
-				var success = 0;
-				var failed = 0;
+				success =
+					failed = 0;
 
 				addEventListener("storage", function(e) {
 					if (e.key == page) {
 						var id = e.newValue;
-						doGetById(id)
-							.then(function(data) {
-								if (data && id === data.id) {
-									success++;
-								} else {
-									failed++;
-								}
-
-								console.log(success, failed, success / (success + failed));
-							});
+						doRead(id);
 					}
 				});
+			}
+
+			function doRead(id) {
+				doGetById(id)
+					.then(function(data) {
+						(data && id === data.id) ?
+						success++ :
+						failed++;
+
+						console.log(success, failed, success / (success + failed) * 100 + '%');
+					});
 			}
 
 			function write() {
@@ -125,7 +130,10 @@
 					var data = createEmployee(order);
 					doInsertEmployee(data)
 						.then(function() {
-							localStorage.setItem(page, data.id);
+							if (Math.random() > 0.9) {
+								localStorage.setItem(page, data.id);
+							}
+
 							doWrite(order + 1);
 						}, function() {
 							console.timeEnd('write');
@@ -590,7 +598,7 @@
 			</div>
 			<div class="row">
 				<label>job:</label>
-				<input type="radio" radiogroup="job" name="job" value="reader" id="reader"><label for="job">reader</label>
+				<input type="radio" radiogroup="job" name="job" value="reader" id="reader"><label for="reader">reader</label>
 				<input type="radio" radiogroup="job" name="job" value="writer" id="writer"><label for="writer">writer</label>
 			</div>
 			<div class="row">
