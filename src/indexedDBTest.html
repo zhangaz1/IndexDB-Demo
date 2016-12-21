@@ -207,7 +207,12 @@
 						success++ :
 						failed++;
 
-						console.result([success, failed, (success / (success + failed) * 100).toFixed(2) + '%']);
+						console.result([
+							'read result:',
+							'success:', success,
+							'failed:', failed,
+							'rate:', (success / (success + failed) * 100).toFixed(2) + '%'
+						].join(' '));
 					});
 			}
 
