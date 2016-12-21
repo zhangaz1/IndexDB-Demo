@@ -156,8 +156,8 @@ $(function() {
 			if(key === 'id') {
 				return;
 			}
-			thinkOver[key] = mergeSummaryToThinkOver(thinkOver[key], summaryDic[key]);
-			showSummary(thinkOver[key]);
+			thinkOverDic[key] = mergeSummaryToThinkOver(thinkOverDic[key], summaryDic[key]);
+			showSummary(thinkOverDic[key]);
 		});
 	}
 
