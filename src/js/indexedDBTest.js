@@ -44,7 +44,17 @@ $(function() {
 	$('#get').click(getById);
 	$('#delete').click(deleteById);
 
-	$('#start').click(start);
+	$('#start').click(function() {
+		start();
+		localStorage.setItem('start', true /*getGuid()*/ );
+	});
+
+	addEventListener('storage', function(e) {
+		if(e.key === 'start') {
+			start();
+		}
+	});
+
 
 	var summaryDic = {};
 
@@ -182,7 +192,7 @@ $(function() {
 		success =
 			failed = 0;
 
-		addEventListener("storage", function(e) {
+		addEventListener('storage', function(e) {
 			if(e.key == page) {
 				var id = e.newValue;
 				toDoRead(id);
