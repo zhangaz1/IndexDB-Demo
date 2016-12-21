@@ -7,6 +7,7 @@
 	<script type="text/javascript" src="libs/lodash/lodash.js"></script>
 	<script type="text/javascript" src="libs/jquery/jquery.js"></script>
 	<script type="text/javascript" src="libs/less/less.js"></script>
+	<script type="text/javascript" src="libs/guid.js"></script>
 
 	<script>
 		$(function() {
@@ -41,28 +42,102 @@
 				writer: 'writer',
 			};
 
-			var size = 1; //1; // M
-			var dbName = 'test';
+			var page = 1;
+			var size = 0.2; //1; // M
+			var dbName = 'test2';
 			var job = jobs.reader;
+			var records = 20000;
 
-			$('#size').change(function() {
-				size = $(this).val();
-			}).val(size);
+			var result = $('#result');
 
-			$('#db').change(function() {
-				dbName = $(this).val();
-			}).val(dbName);
+			$('#page')
+				.change(function() {
+					page = $(this).val();
+				})
+				.val(page);
 
-			$('input[name="job"]').change(function() {
-				job = $('input[name="job"]:checked').val();
-			});
+			$('#size')
+				.change(function() {
+					size = $(this).val();
+				})
+				.val(size);
 
-			$('input[name="job"][value=reader]').attr('checked', true);
+			$('#db')
+				.change(function() {
+					dbName = $(this).val();
+				})
+				.val(dbName);
+
+			$('#records')
+				.change(function() {
+					records = $(this).val();
+				})
+				.val(records);
+
+			$('input[name="job"]')
+				.change(function() {
+					job = $('input[name="job"]:checked').val();
+				});
+
+			$('input[name="job"][value=reader]')
+				.attr('checked', true);
 
 			return void(0);
 
 			function start() {
+				if (job === jobs.reader) {
+					read();
+				} else {
+					write();
+				}
+			}
 
+			function read() {
+				var success = 0;
+				var failed = 0;
+
+				addEventListener("storage", function(e) {
+					if (e.key == page) {
+						var id = e.newValue;
+						doGetById(id)
+							.then(function(data) {
+								if (data && id === data.id) {
+									success++;
+								} else {
+									failed++;
+								}
+
+								console.log(success, failed, success / (success + failed));
+							});
+					}
+				});
+			}
+
+			function write() {
+				getDb(function() {
+					console.time('write');
+					doWrite(0);
+				});
+			}
+
+			function doWrite(order) {
+				if (order < records) {
+					var data = createEmployee(order);
+					doInsertEmployee(data)
+						.then(function() {
+							localStorage.setItem(page, data.id);
+							doWrite(order + 1);
+						}, function() {
+							console.timeEnd('write');
+						});
+				} else {
+					console.timeEnd('write');
+				}
+			}
+
+
+			function getGuid() {
+				return Guid.NewGuid().ToString();
 			}
 
 			function deleteById() {
@@ -84,11 +159,11 @@
 			}
 
 			function getById() {
-				doGetById();
+				return doGetById();
 			}
 
 			function doGetById(id) {
-				getDb(function() {
+				return getDb(function() {
 					var store = getStoreReadOnly();
 
 					var key = 'GetById';
@@ -97,9 +172,10 @@
 					id = id || randomId();
 
 					var request = store.get(id);
-					logRequestResult(request, key)
+					return logRequestResult(request, key)
 						.then(function(data) {
-							console.log(id, data);
+							// console.log(id, data);
+							return data;
 						});
 				});
 			}
@@ -156,14 +232,14 @@
 
 			function createEmployee(order) {
 				return {
-					"id": "E" + order,
-					"first_name": "Jane",
-					"last_name": "Doh",
-					"email": "jane.doh@somedomain.com_" + order,
+					"id": getGuid(), // "E" + order,
+					// "first_name": "Jane",
+					// "last_name": "Doh",
+					// "email": "jane.doh@somedomain.com_" + order,
 					"street": getData(),
-					"city": "Washington D.C.",
-					"state": "DC",
-					"zip_code": "20500",
+					// "city": "Washington D.C.",
+					// "state": "DC",
+					// "zip_code": "20500",
 				};
 			}
 
@@ -245,7 +321,7 @@
 			function doInsert50W3(order, data) {
 				if (order < w50) {
 					// data.data = order;
-					data.id = order;
+					data.id = getGuid();
 					doInsertEmployee(data)
 						.then(function() {
 							doInsert50W3(order + 1, data);
@@ -259,10 +335,10 @@
 
 			function getDb(cb) {
 				if (!db) {
-					openDatabase(dbName)
+					return openDatabase(dbName)
 						.then(cb);
 				} else {
-					cb(db);
+					return cb(db);
 				}
 			}
 
@@ -436,7 +512,7 @@
 			}
 
 			function getDbName() {
-				return prompt('Please enter your Database Name', '');
+				return dbName || prompt('Please enter your Database Name', '');
 			}
 
 			function getAllDbs() {
@@ -456,7 +532,7 @@
 			}
 
 			function createData() {
-				var n = 1024 * size;
+				var n = Math.floor(1024 / 2 * size - 30);
 				var data = new Array(n);
 				for (i = 0; i < n; i++) {
 					data[i] = i;
@@ -501,10 +577,16 @@
 
 		<div class="panel form">
 			<div class="row">
+				<label for="page">page:</label><input type="text" id="page">
+			</div>
+			<div class="row">
 				<label for="db">db:</label><input type="text" id="db">
 			</div>
 			<div class="row">
 				<label for="size">recordSize(kb):</label><input type="text" id="size">
+			</div>
+			<div class="row">
+				<label for="records">records:</label><input type="text" id="records">
 			</div>
 			<div class="row">
 				<label>job:</label>
@@ -514,12 +596,9 @@
 			<div class="row">
 				<button id="start">start</button>
 			</div>
+			<div class="row" id="result"></div>
 		</div>
 	</div>
 </body>
-
-</html>
-
-</html>
 
 </html>
