@@ -46,7 +46,7 @@ $(function() {
 
 	$('#start').click(function() {
 		start();
-		localStorage.setItem('start', true /*getGuid()*/ );
+		localStorage.setItem('start', getGuid());
 	});
 
 	addEventListener('storage', function(e) {
@@ -55,6 +55,20 @@ $(function() {
 		}
 	});
 
+	addEventListener('storage', function(e) {
+		if(e.key === 'fireThinkOver') {
+			summaryDic.id = getGuid();
+			localStorage.setItem('submitSummary', JSON.stringify(summaryDic));
+		}
+	});
+
+	var thinkOverDic = {};
+
+	$('#thinkOver').click(function() {
+		thinkOverDic = {};
+		bindThinkOverHandler();
+		localStorage.setItem('fireThinkOver', getGuid());
+	});
 
 	var summaryDic = {};
 
@@ -122,6 +136,52 @@ $(function() {
 
 	return void(0);
 
+	function bindThinkOverHandler() {
+		if(bindThinkOverHandler.done) {
+			return;
+		}
+
+		addEventListener('storage', function(e) {
+			if(e.key === 'submitSummary') {
+				mergeSummaryDicToThinkOver(JSON.parse(e.newValue));
+			}
+		});
+
+		bindThinkOverHandler.done = true;
+	}
+
+	function mergeSummaryDicToThinkOver(summaryDic) {
+		var keys = _.keys(summaryDic);
+		_.each(keys, function(key) {
+			if(key === 'id') {
+				return;
+			}
+			thinkOver[key] = mergeSummaryToThinkOver(thinkOver[key], summaryDic[key]);
+			showSummary(thinkOver[key]);
+		});
+	}
+
+	function mergeSummaryToThinkOver(summarySum, summaryNew) {
+		if(!summarySum) {
+			return summaryNew;
+		}
+		mergeSummary(summarySum, summaryNew);
+		return summarySum;
+	}
+
+	function mergeSummary(summarySum, summaryNew) {
+		summarySum.count += summaryNew.count;
+		summarySum.sum += summaryNew.sum;
+
+		if(summarySum.min > summaryNew.min) {
+			summarySum.min = summaryNew.min;
+		}
+
+		if(summarySum.max < summaryNew.max) {
+			summarySum.max = summaryNew.max;
+		}
+	}
+
 	function summary(key, time) {
 		var summaryInfo = summaryDic[key];
 		if(!summaryInfo) {
@@ -154,6 +214,7 @@ $(function() {
 			'max:', summaryInfo.max,
 			'average:', (summaryInfo.sum / summaryInfo.count).toFixed(2),
 			'count:', summaryInfo.count,
+			'sum:', summaryInfo.sum,
 		].join(' ');
 	}
 
