@@ -88,9 +88,9 @@ $(function() {
 
 	var page = 1;
 	var size = 30; //1; // M
-	var dbName = 'test4';
+	var dbName = 'test5';
 	var job = jobs.writer;
-	var records = 200000;
+	var records = 2000;
 	var delay = 0;
 
 	var summarys = $('#summarys');
@@ -245,7 +245,7 @@ $(function() {
 		if(job === jobs.reader) {
 			read();
 		} else {
-			write();
+			write2();
 		}
 	}
 
@@ -284,6 +284,31 @@ $(function() {
 					'rate:', (success / (success + failed) * 100).toFixed(2) + '%'
 				].join(' '), 'Read');
 			});
+	}
+
+	function write2() {
+		getDb(function() {
+			console.time('write');
+			doWrite2();
+		});
+	}
+
+	function doWrite2() {
+		var order = 0;
+		var employee = createEmployee(order);
+		var store = getStoreReadWrite();
+
+		console.time('write2');
+		while(order++ < records) {
+			employee.id = order;
+
+			store.add(employee);
+
+			if(Math.random() > 0.9) {
+				localStorage.setItem(page, data.id);
+			}
+		}
+		console.timeEnd('write2');
 	}
 
 	function write() {
