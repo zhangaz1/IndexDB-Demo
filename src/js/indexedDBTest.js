@@ -90,7 +90,7 @@ $(function() {
 
 	var page = 1;
 	var size = 30; //1; // M
-	var dbName = 'test6';
+	var dbName = 'test7';
 	var job = jobs.writer;
 	var records = 2000;
 	var delay = 0;
@@ -169,6 +169,7 @@ $(function() {
 		var db = getPouchDB();
 
 		var data = createEmployee(0);
+
 		pouchdbWriteDataWhile(db, data, records);
 	}
 
@@ -184,14 +185,14 @@ $(function() {
 	}
 
 	function pouchdbWriteOneData(db, data) {
-		data._id = getGuid();
+		data.id = getGuid();
 
 		console.time('Write');
-		return db.put(data).then(function(response) {
+		return db.add(data).then(function(response) {
 			console.timeEnd('Write');
 			// console.log('pouchdbWrite success', response);
 			if(Math.random() > 0.9) {
-				localStorage.setItem(page, data._id);
+				localStorage.setItem(page, data.id);
 			}
 		}).catch(function(err) {
 			console.log(err);
@@ -199,11 +200,26 @@ $(function() {
 	}
 
 	function getPouchDB() {
+		return getDexieStore();
+
 		return getPouchDB.db || (
 			getPouchDB.db = PouchDB(dbName, {
 				adapter: 'idb', // 'fruitdown'
 			})
 		);
+	}
+
+	function getDexieStore() {
+		if(getDexieStore.store) {
+			return getDexieStore.store;
+		}
+
+		var db = new Dexie(dbName);
+		db.version(1).stores({
+			employee: "++id,street"
+		});
+
+		return getDexieStore.store = db.employee;
 	}
 
 	function bindThinkOverHandler() {
