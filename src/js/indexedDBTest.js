@@ -1,5 +1,7 @@
 $(function() {
 
+	console.log($.browser);
+
 	console.keys = {};
 	console.time = function(key) {
 		console.keys[key] = Date.now();
@@ -88,7 +90,7 @@ $(function() {
 
 	var page = 1;
 	var size = 30; //1; // M
-	var dbName = 'test5';
+	var dbName = 'test6';
 	var job = jobs.writer;
 	var records = 2000;
 	var delay = 0;
@@ -198,8 +200,8 @@ $(function() {
 
 	function getPouchDB() {
 		return getPouchDB.db || (
-			getPouchDB.db = PouchDB('test5', {
-				adapter: 'idb'
+			getPouchDB.db = PouchDB(dbName, {
+				adapter: 'idb', // 'fruitdown'
 			})
 		);
 	}
