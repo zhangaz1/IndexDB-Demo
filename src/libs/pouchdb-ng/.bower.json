@@ -1,0 +1,23 @@
+{
+  "name": "pouchdb-ng",
+  "version": "1.0.1",
+  "main": "pouchdb-ng.js",
+  "ignore": [
+    "example",
+    ".idea",
+    ".git"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "homepage": "https://github.com/AnalogJ/pouchdb-ng",
+  "_release": "1.0.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.0.1",
+    "commit": "0e693a2ecce7c7c32eeb7a6f8811a34daee3e7dd"
+  },
+  "_source": "https://github.com/AnalogJ/pouchdb-ng.git",
+  "_target": "^1.0.1",
+  "_originalSource": "pouchdb-ng",
+  "_direct": true
+}
