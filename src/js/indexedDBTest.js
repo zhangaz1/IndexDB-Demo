@@ -136,6 +136,74 @@ $(function() {
 
 	return void(0);
 
+	function start() {
+		// startWithOriginal();
+		startWithPouchDB();
+	}
+
+	function startWithPouchDB() {
+		if(job === jobs.reader) {
+			pouchdbRead();
+		} else {
+			pouchdbWrite();
+		}
+	}
+
+	function pouchdbRead() {
+		registerReader(doPouchdbRead);
+	}
+
+	function doPouchdbRead(id) {
+		var db = getPouchDB();
+		console.time('Read');
+		return db.get(id)
+			.then(function(data) {
+				console.timeEnd('Read');
+				return data;
+			});
+	}
+
+	function pouchdbWrite() {
+		var db = getPouchDB();
+
+		var data = createEmployee(0);
+		pouchdbWriteDataWhile(db, data, records);
+	}
+
+	function pouchdbWriteDataWhile(db, data, records) {
+		if(records <= 0) {
+			return;
+		}
+
+		pouchdbWriteOneData(db, data)
+			.then(function() {
+				pouchdbWriteDataWhile(db, data, --records);
+			});
+	}
+
+	function pouchdbWriteOneData(db, data) {
+		data._id = getGuid();
+
+		console.time('Write');
+		return db.put(data).then(function(response) {
+			console.timeEnd('Write');
+			// console.log('pouchdbWrite success', response);
+			if(Math.random() > 0.9) {
+				localStorage.setItem(page, data._id);
+			}
+		}).catch(function(err) {
+			console.log(err);
+		});
+	}
+
+	function getPouchDB() {
+		return getPouchDB.db || (
+			getPouchDB.db = PouchDB('test5', {
+				adapter: 'idb'
+			})
+		);
+	}
+
 	function bindThinkOverHandler() {
 		if(bindThinkOverHandler.done) {
 			return;
@@ -241,49 +309,35 @@ $(function() {
 		};
 	}
 
-	function start() {
+	function startWithOriginal() {
 		if(job === jobs.reader) {
-			read();
+			registerReader(doGetById);
 		} else {
 			write2();
 		}
 	}
 
-	function read() {
+	function registerReader(read) {
 		success =
 			failed = 0;
 
 		addEventListener('storage', function(e) {
 			if(e.key == page) {
 				var id = e.newValue;
-				toDoRead(id);
+				read(id)
+					.then(function(data) {
+						(data && (id === data.id || id === data._id)) ?
+						success++ :
+						failed++;
+
+						console.result([
+							'success:', success,
+							'failed:', failed,
+							'rate:', (success / (success + failed) * 100).toFixed(2) + '%'
+						].join(' '), 'Read');
+					});;
 			}
 		});
-	}
-
-	function toDoRead(id) {
-		if(delay) {
-			setTimeout(function() {
-				doRead(id);
-			}, delay);
-		} else {
-			doRead(id);
-		}
-	}
-
-	function doRead(id) {
-		doGetById(id)
-			.then(function(data) {
-				(data && id === data.id) ?
-				success++ :
-				failed++;
-
-				console.result([
-					'success:', success,
-					'failed:', failed,
-					'rate:', (success / (success + failed) * 100).toFixed(2) + '%'
-				].join(' '), 'Read');
-			});
 	}
 
 	function write2() {
